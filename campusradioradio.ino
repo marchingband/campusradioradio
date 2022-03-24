@@ -5,39 +5,59 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include "stations.h"
+// #include "stations.h"
 #include "encoder.h"
 #include <Fonts/FreeSans18pt7b.h>
 #include <Fonts/FreeSans9pt7b.h>
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+#include <Preferences.h>
 
-// I2S
-#define I2S_DOUT      23 // 17 // 22  // DIN connection
-#define I2S_BCLK      26 // 18 // 26  // Bit clock
-#define I2S_LRC       25 // 19 // 25  // Left Right Clock
+// STATIONS JSON
+#define JSON_HOST "https://raw.githubusercontent.com/marchingband/campusradioradio/main/stations.json"
 
 // OLED
 #define OLED_RESET -1 // no reset pin
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 32
 #define SCREEN_ADDRESS 0x3C
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-// VOLUME
+// I2S
+#define I2S_DOUT      23 // 17 // 22  // DIN connection
+#define I2S_BCLK      26 // 18 // 26  // Bit clock
+#define I2S_LRC       25 // 19 // 25  // Left Right Clock
 #define VOLUME_PIN 39
-
-//WiFi
-// String ssid =     "ChillsideManor";
-// String password = "chilldog";
- 
 Audio audio;
 uint8_t volume = 0;
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Preferences preferences;
 
-int current_station = 2;
+unsigned int current_station;
 bool captive_portal_on = false;
 bool wifi_connected = false;
 bool buffering_audio = false;
+bool fetching_stations = false;
+
+struct SpiRamAllocator {
+    void* allocate(size_t size) {
+        return heap_caps_malloc(size, MALLOC_CAP_SPIRAM);
+    }
+
+    void deallocate(void* pointer) {
+        heap_caps_free(pointer);
+    }
+
+    void* reallocate(void* ptr, size_t new_size) {
+        return heap_caps_realloc(ptr, new_size, MALLOC_CAP_SPIRAM);
+    }
+};
+
+typedef BasicJsonDocument<SpiRamAllocator> SpiRamJsonDocument;
+// using SpiRamJsonDocument = BasicJsonDocument<SpiRamAllocator>;
+SpiRamJsonDocument *stations;
+int num_stations = 0;
 
 void readVolume(void)
 {
@@ -88,11 +108,18 @@ void on_radio_encoder(bool up)
 {
     int new_station = current_station;
     if(up)
-        new_station += (current_station < (NUM_STATIONS - 1));
+    {
+        new_station += (current_station < (num_stations - 1));
+    }
     else
+    {
         new_station -= (current_station > 0);
+    }
     if(new_station != current_station)
+    {
         current_station = new_station;
+        preferences.putUInt("station", current_station);
+    }
 }
 
 void configModeCallback (WiFiManager *myWiFiManager)
@@ -121,24 +148,36 @@ static void ui_task(void* arg)
             display.println("SETUP WIFI");
             display.display();
         }
+        else if(fetching_stations)
+        {
+            display.setFont(&FreeSans9pt7b);
+            display.setTextWrap(false);
+            display.clearDisplay();
+            // display.setCursor(10, 10);
+            // display.println("loading");
+            // display.setCursor(10, 24);
+            // display.println("stations");
+            display.setCursor(0, 12);
+            display.println("load stations");
+            display.display();
+        }
         else if(!wifi_connected)
         {
-            // // display.setFont(&FreeSans9pt7b);
-            // // display.setTextWrap(false);
             display.clearDisplay();
-            // display.setCursor(0, 12);
-            // display.println("Connecting to");
-            // display.setCursor(0, 26);
-            // display.println("WiFi");
             display.display();
         }
         else if(current_station != last_station)
         {
             last_station = current_station;
+
+            JsonArray data = stations->as<JsonArray>();
+            JsonArray station_data = data[last_station].as<JsonArray>();
+            const char* station_callsign = station_data[0];
+
             display.clearDisplay();
             display.setFont(&FreeSans18pt7b);
             display.setCursor(10, 28);
-            display.println(stations[current_station].callsign);
+            display.println(station_callsign);
             display.display();
         }
         if( buffering_audio || !wifi_connected || show_dot )
@@ -163,12 +202,47 @@ static void audio_task(void* arg)
         {
             last_station = current_station;
             buffering_audio = true;
-            audio.connecttohost(stations[last_station].URL);
+            JsonArray data = stations->as<JsonArray>();
+            JsonArray station_data = data[last_station].as<JsonArray>();
+            const char* station_host = station_data[1];
+            // log_i("connecting to %s %s", station_callsign, station_host);
+            audio.connecttohost(station_host);
+            // audio.connecttohost(stations[last_station][1].as<const char*>());
             audio.setVolume(volume);
             buffering_audio = false;
         }
         audio.loop();
     }
+}
+
+void get_json(void)
+{
+    fetching_stations = true;
+    stations = new SpiRamJsonDocument(60000);
+
+    if (WiFi.status() == WL_CONNECTED) {
+        HTTPClient http;
+        http.begin(JSON_HOST);
+        int httpResponceCode = http.GET();
+        if (httpResponceCode > 0) {
+            Serial.println(httpResponceCode);
+            DeserializationError error = deserializeJson(*stations, http.getStream());
+            if (error) {
+                Serial.print("deserializeJson() failed: ");
+                Serial.println(error.c_str());
+                return;
+            }
+            num_stations = stations->as<JsonArray>().size();
+            log_i("found %d stations", num_stations);
+        } else {
+            Serial.print("err:");
+            Serial.println(httpResponceCode);
+        }
+        http.end();
+    } else {
+        Serial.println("wifi err");
+    }
+    fetching_stations = false;
 }
 
 void setup()
@@ -177,6 +251,10 @@ void setup()
     disableCore1WDT();    
 
     Serial.begin(115200);
+    preferences.begin("eeprom", false);
+
+    current_station = preferences.getUInt("station", 0);
+
     pinMode(VOLUME_PIN, INPUT);
     encoder_init(34,35);
     on_encoder = on_radio_encoder;
@@ -196,6 +274,7 @@ void setup()
         Serial.println("connected...yeey :)");
         captive_portal_on = false;
         wifi_connected = true;
+        get_json();
         readVolume();
         xTaskCreatePinnedToCore(audio_task, "audio_task", 5000, NULL, 3  | portPRIVILEGE_BIT, NULL, 0);
     }
