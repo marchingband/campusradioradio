@@ -1,0 +1,43 @@
+[[
+    "CFAK",
+    "http://streamer01.sti.usherbrooke.ca:8000/cfak.mp3"
+],
+[
+    "CJBU",
+    "http://142.12.32.15:8000/stream.m3u"
+],
+[
+    "CJIQ",
+    "https://conestoga.leanstream.co/CJIQFM"
+],
+[
+    "CJRU",
+    "https://ryerson.out.airtime.pro/ryerson_a"    
+],
+[
+    "CJSW",
+    "https://cjsw.leanstream.co/CJSWFM"    
+],
+[
+    "CKDJ",
+    "https://live.leanstream.co/CKDJFM"    
+],
+[
+    "CKHC",
+    "https://humber.leanstream.co/CKHCFM-MP3?args=web_02"    
+],
+[
+    "CFMH", // slow and choppy
+    "http://cfmh-listen.unbsj.ca:8000/"
+],
+[
+    "CFML", // drop outs, too many channels?
+    "https://ais-sa1.streamon.fm/7161_64k.aac"
+],
+[
+    "CHMA", // choppy
+    "https://securestreams6.autopo.st:2111/"
+],
+
+
+]
