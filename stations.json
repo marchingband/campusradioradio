@@ -103,12 +103,8 @@
     "http://stream.cjam.ca:8000/"
 ],
 [
-    "CJBU",
-    "http://142.12.32.15:8000/stream.m3u"
-],
-[
     "CJIQ",
-    "https://conestoga.leanstream.co/CJIQFM"
+    "https://conestoga.leanstream.co/CJIQFM?args=3rdparty_01&starttime=1648172882"
 ],
 [
     "CJJJ",

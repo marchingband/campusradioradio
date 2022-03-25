@@ -17,6 +17,11 @@
 // STATIONS JSON
 #define JSON_HOST "https://raw.githubusercontent.com/marchingband/campusradioradio/main/stations.json"
 
+// ENCODER
+#define ENC_PUSH 19
+#define ENC_A 34
+#define ENC_B 35
+
 // OLED
 #define OLED_RESET -1 // no reset pin
 #define SCREEN_WIDTH 128
@@ -200,7 +205,7 @@ static void audio_task(void* arg)
     {
         if(current_station != last_station)
         {
-            last_station = current_station;
+            last_station = current_station < (num_stations - 1) ? current_station : (num_stations - 1);
             buffering_audio = true;
             JsonArray data = stations->as<JsonArray>();
             JsonArray station_data = data[last_station].as<JsonArray>();
@@ -251,12 +256,14 @@ void setup()
     disableCore1WDT();    
 
     Serial.begin(115200);
+
     preferences.begin("eeprom", false);
 
     current_station = preferences.getUInt("station", 0);
 
     pinMode(VOLUME_PIN, INPUT);
-    encoder_init(34,35);
+    pinMode(ENC_PUSH, INPUT_PULLUP);
+    encoder_init(ENC_A, ENC_B);
     on_encoder = on_radio_encoder;
 
     xTaskCreatePinnedToCore(ui_task, "ui_task", 2048, NULL, 3, NULL, 1);
@@ -265,6 +272,17 @@ void setup()
     WiFiManager wm;
     // wm.resetSettings();
     wm.setAPCallback(configModeCallback);
+    int normal_mode = digitalRead(ENC_PUSH);
+    log_i("enc push %s", normal_mode == 1 ? "high" : "low");
+    if(normal_mode == 0)
+    {
+        captive_portal_on = true;
+        wm.startConfigPortal("Campus Radio Radio", "campusradio");
+        log_i("config closed");
+        delay(1000);
+        ESP.restart();
+    }
+
     if(!wm.autoConnect("Campus Radio Radio", "campusradio"))
     {
         ESP.restart();
