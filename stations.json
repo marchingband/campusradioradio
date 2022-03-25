@@ -103,10 +103,6 @@
     "http://stream.cjam.ca:8000/"
 ],
 [
-    "CJIQ",
-    "https://conestoga.leanstream.co/CJIQFM?args=3rdparty_01&starttime=1648172882"
-],
-[
     "CJJJ",
     "https://assiniboine.net/sites/default/files/documents/2019-09/cj106-mp3.m3u"
 ],
@@ -123,20 +119,12 @@
     "http://the.radioservers.biz:9996/;"    
 ],
 [
-    "CJRU",
-    "https://ryerson.out.airtime.pro/ryerson_a"    
-],
-[
     "CJSF",
     "https://www.cjsf.ca:8443/listen"    
 ],
 [
     "CJSR",
     "http://ais-sa1.streamon.fm/7093_24k.aac"
-],
-[
-    "CJSW",
-    "https://cjsw.leanstream.co/CJSWFM"    
 ],
 [
     "CJUM",
@@ -147,16 +135,8 @@
     "https://stream2.statsradio.com:8124/stream"    
 ],
 [
-    "CKDJ",
-    "https://live.leanstream.co/CKDJFM"    
-],
-[
     "CKDU",
     "https://archive1.ckdu.ca:9750/ckdu_1_on_air_low.mp3"    
-],
-[
-    "CKHC",
-    "https://humber.leanstream.co/CKHCFM-MP3?args=web_02"    
 ],
 [
     "CKLU",
