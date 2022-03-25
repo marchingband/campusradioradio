@@ -2,11 +2,9 @@
 #include <stdlib.h>
 #include "Audio.h"
 #include "WiFi.h"
-#include <WiFiClientSecure.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-// #include "stations.h"
 #include "encoder.h"
 #include <Fonts/FreeSans18pt7b.h>
 #include <Fonts/FreeSans9pt7b.h>
@@ -250,12 +248,14 @@ void get_json(void)
     stations = new SpiRamJsonDocument(60000);
 
     if (WiFi.status() == WL_CONNECTED) {
-        WiFiClientSecure client;
-        client.begin(JSON_HOST);
-        int httpResponceCode = client.GET();
+        // WiFiClientSecure client;
+        HTTPClient http;
+        http.connectSSL(JSON_HOST, 443);
+        // http.begin(JSON_HOST);
+        int httpResponceCode = http.GET();
         if (httpResponceCode > 0) {
             Serial.println(httpResponceCode);
-            DeserializationError error = deserializeJson(*stations, client.getStream());
+            DeserializationError error = deserializeJson(*stations, http.getStream());
             if (error) {
                 Serial.print("deserializeJson() failed: ");
                 Serial.println(error.c_str());
@@ -267,7 +267,7 @@ void get_json(void)
             Serial.print("err:");
             Serial.println(httpResponceCode);
         }
-        client.end();
+        http.end();
     } else {
         Serial.println("wifi err");
     }
