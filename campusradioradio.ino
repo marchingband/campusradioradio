@@ -35,7 +35,8 @@ Audio audio;
 uint8_t volume = 0;
 
 // STATIONS
-#define JSON_HOST "https://raw.githubusercontent.com/marchingband/campusradioradio/main/stations.json"
+// #define JSON_HOST "https://raw.githubusercontent.com/marchingband/campusradioradio/main/stations.json"
+#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations.json"
 Preferences preferences;
 struct SpiRamAllocator {
     void* allocate(size_t size) {
@@ -242,16 +243,11 @@ static void audio_task(void* arg)
     }
 }
 
-void get_json(void)
+bool fetch_json(void)
 {
-    fetching_stations = true;
-    stations = new SpiRamJsonDocument(60000);
-
     if (WiFi.status() == WL_CONNECTED) {
-        // WiFiClientSecure client;
         HTTPClient http;
-        http.connectSSL(JSON_HOST, 443);
-        // http.begin(JSON_HOST);
+        http.begin(JSON_HOST);
         int httpResponceCode = http.GET();
         if (httpResponceCode > 0) {
             Serial.println(httpResponceCode);
@@ -259,19 +255,34 @@ void get_json(void)
             if (error) {
                 Serial.print("deserializeJson() failed: ");
                 Serial.println(error.c_str());
-                return;
+                http.end();
+                return 1;
             }
             num_stations = stations->as<JsonArray>().size();
             log_i("found %d stations", num_stations);
+            return 0;
         } else {
             Serial.print("err:");
             Serial.println(httpResponceCode);
+            http.end();
+            return 1;
         }
         http.end();
+        return 0;
     } else {
         Serial.println("wifi err");
+        return 1;
     }
-    fetching_stations = false;
+}
+
+void get_json(void)
+{
+    fetching_stations = true;
+    stations = new SpiRamJsonDocument(60000);
+    while(fetching_stations)
+    {
+        fetching_stations = fetch_json();
+    }
 }
 
 void setup()
