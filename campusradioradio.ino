@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "Audio.h"
 #include "WiFi.h"
+#include <WiFiClientSecure.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -14,9 +15,6 @@
 #include <ArduinoJson.h>
 #include <Preferences.h>
 
-// STATIONS JSON
-#define JSON_HOST "https://raw.githubusercontent.com/marchingband/campusradioradio/main/stations.json"
-
 // ENCODER
 #define ENC_PUSH 19
 #define ENC_A 34
@@ -27,9 +25,10 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 32
 #define SCREEN_ADDRESS 0x3C
+#define DISPLAY_ON_SECONDS 15
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-// I2S
+// AUDIO
 #define I2S_DOUT      23 // 17 // 22  // DIN connection
 #define I2S_BCLK      26 // 18 // 26  // Bit clock
 #define I2S_LRC       25 // 19 // 25  // Left Right Clock
@@ -37,32 +36,40 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 Audio audio;
 uint8_t volume = 0;
 
+// STATIONS
+#define JSON_HOST "https://raw.githubusercontent.com/marchingband/campusradioradio/main/stations.json"
 Preferences preferences;
+struct SpiRamAllocator {
+    void* allocate(size_t size) {
+        return heap_caps_malloc(size, MALLOC_CAP_SPIRAM);
+    }
+    void deallocate(void* pointer) {
+        heap_caps_free(pointer);
+    }
+    void* reallocate(void* ptr, size_t new_size) {
+        return heap_caps_realloc(ptr, new_size, MALLOC_CAP_SPIRAM);
+    }
+};
+typedef BasicJsonDocument<SpiRamAllocator> SpiRamJsonDocument;
+SpiRamJsonDocument *stations;
 
+// VARS
 unsigned int current_station;
 bool captive_portal_on = false;
 bool wifi_connected = false;
 bool buffering_audio = false;
 bool fetching_stations = false;
-
-struct SpiRamAllocator {
-    void* allocate(size_t size) {
-        return heap_caps_malloc(size, MALLOC_CAP_SPIRAM);
-    }
-
-    void deallocate(void* pointer) {
-        heap_caps_free(pointer);
-    }
-
-    void* reallocate(void* ptr, size_t new_size) {
-        return heap_caps_realloc(ptr, new_size, MALLOC_CAP_SPIRAM);
-    }
-};
-
-typedef BasicJsonDocument<SpiRamAllocator> SpiRamJsonDocument;
-// using SpiRamJsonDocument = BasicJsonDocument<SpiRamAllocator>;
-SpiRamJsonDocument *stations;
+unsigned int last_display_update = 0;
+bool should_wake_display = false;
 int num_stations = 0;
+
+void use_screen(void){
+    last_display_update = millis();
+}
+
+bool should_sleep(void){
+    return(millis() - last_display_update > (1000 * DISPLAY_ON_SECONDS));
+}
 
 void readVolume(void)
 {
@@ -94,6 +101,8 @@ void readVolume(void)
         pot = 4096 - (new_volume * 186); // place the pot value in the lower bound for that range
         pot += volume >= 21 ? (-98) : 98; // place the pot value in the median value for that range
         audio.setVolume(volume); // 0...21
+        use_screen();
+        should_wake_display = true;
         log_i("pot: %d %d", pot, volume);
     }
 
@@ -111,6 +120,8 @@ void readVolume(void)
 
 void on_radio_encoder(bool up)
 {
+    use_screen();
+    should_wake_display = true;
     int new_station = current_station;
     if(up)
     {
@@ -142,10 +153,14 @@ static void ui_task(void* arg)
     display.setFont(&FreeSans18pt7b);
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
+    display.ssd1306_command(SSD1306_SETCONTRAST);
+    display.ssd1306_command(0);
+    use_screen();
     for(;;)
     {
         if(captive_portal_on)
         {
+            use_screen();
             display.setFont(&FreeSans9pt7b);
             display.setTextWrap(false);
             display.clearDisplay();
@@ -155,24 +170,27 @@ static void ui_task(void* arg)
         }
         else if(fetching_stations)
         {
+            use_screen();
             display.setFont(&FreeSans9pt7b);
             display.setTextWrap(false);
             display.clearDisplay();
-            // display.setCursor(10, 10);
-            // display.println("loading");
-            // display.setCursor(10, 24);
-            // display.println("stations");
-            display.setCursor(0, 12);
-            display.println("load stations");
+            display.setCursor(0, 18);
+            display.println("loading stations");
             display.display();
         }
         else if(!wifi_connected)
         {
+            use_screen();
             display.clearDisplay();
             display.display();
         }
-        else if(current_station != last_station)
+        else if(
+            (current_station != last_station) ||
+            should_wake_display
+        )
         {
+            should_wake_display = false;
+            use_screen();
             last_station = current_station;
 
             JsonArray data = stations->as<JsonArray>();
@@ -187,11 +205,17 @@ static void ui_task(void* arg)
         }
         if( buffering_audio || !wifi_connected || show_dot )
         {
+            use_screen();
             display.fillRoundRect(display.width() - 10, display.height() / 2, 6, 6, 3, SSD1306_INVERSE);
             display.display();
             show_dot = !show_dot;
         }
         readVolume();
+        if(should_sleep())
+        {
+            display.clearDisplay();
+            display.display();
+        }
         vTaskDelay(10);
     }
 }
@@ -226,12 +250,12 @@ void get_json(void)
     stations = new SpiRamJsonDocument(60000);
 
     if (WiFi.status() == WL_CONNECTED) {
-        HTTPClient http;
-        http.begin(JSON_HOST);
-        int httpResponceCode = http.GET();
+        WiFiClientSecure client;
+        client.begin(JSON_HOST);
+        int httpResponceCode = client.GET();
         if (httpResponceCode > 0) {
             Serial.println(httpResponceCode);
-            DeserializationError error = deserializeJson(*stations, http.getStream());
+            DeserializationError error = deserializeJson(*stations, client.getStream());
             if (error) {
                 Serial.print("deserializeJson() failed: ");
                 Serial.println(error.c_str());
@@ -243,7 +267,7 @@ void get_json(void)
             Serial.print("err:");
             Serial.println(httpResponceCode);
         }
-        http.end();
+        client.end();
     } else {
         Serial.println("wifi err");
     }
@@ -258,11 +282,11 @@ void setup()
     Serial.begin(115200);
 
     preferences.begin("eeprom", false);
-
     current_station = preferences.getUInt("station", 0);
 
     pinMode(VOLUME_PIN, INPUT);
     pinMode(ENC_PUSH, INPUT_PULLUP);
+
     encoder_init(ENC_A, ENC_B);
     on_encoder = on_radio_encoder;
 
