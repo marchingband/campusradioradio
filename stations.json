@@ -1,22 +1,10 @@
 [[
-    "CFAK",
-    "http://streamer01.sti.usherbrooke.ca:8000/cfak.mp3"
-],
-[
     "CFBU",
     "http://s2.stationplaylist.com:8110/;&lang=sp&title=CFBU.ca&lang=en"
 ],
 [
     "CFFF",
     "http://trentradio.ca:8800/hi-fi"
-],
-[
-    "CFMH",
-    "http://cfmh-listen.unbsj.ca:8000/"
-],
-[
-    "CFML",
-    "https://ais-sa1.streamon.fm/7161_64k.aac"
 ],
 [
     "CFMU",
@@ -49,10 +37,6 @@
 [
     "CHLY",
     "http://184.69.114.194:8000/stream.mp3"
-],
-[
-    "CHMA",
-    "https://securestreams6.autopo.st:2111/"
 ],
 [
     "CHMR",
