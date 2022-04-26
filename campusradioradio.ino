@@ -229,7 +229,7 @@ static void audio_task(void* arg)
         // guard against bad station indexes
         if( current_station > num_stations)
         {
-            current_station = num_stations;
+            current_station = num_stations-1;
         }
 
         if(current_station != last_station)
