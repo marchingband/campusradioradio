@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 void (*on_encoder)(bool);
-void encoder_init(int enc_a, int enc_b);
+void encoder_init();
 
 #ifdef __cplusplus
 }

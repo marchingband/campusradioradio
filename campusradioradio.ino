@@ -298,10 +298,10 @@ void setup()
     pinMode(VOLUME_PIN, INPUT);
     pinMode(ENC_PUSH, INPUT_PULLUP);
 
-    encoder_init(ENC_A, ENC_B);
+    encoder_init();
     on_encoder = on_radio_encoder;
 
-    xTaskCreatePinnedToCore(ui_task, "ui_task", 2048, NULL, 3, NULL, 1);
+    xTaskCreatePinnedToCore(ui_task, "ui_task", 4096, NULL, 3, NULL, 1);
 
     WiFi.mode(WIFI_STA);
     WiFiManager wm;
@@ -329,7 +329,7 @@ void setup()
         wifi_connected = true;
         get_json();
         readVolume();
-        xTaskCreatePinnedToCore(audio_task, "audio_task", 5000, NULL, 3  | portPRIVILEGE_BIT, NULL, 0);
+        xTaskCreatePinnedToCore(audio_task, "audio_task", 8000, NULL, 3  | portPRIVILEGE_BIT, NULL, 0);
     }
 }
 
