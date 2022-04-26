@@ -13,4 +13,16 @@
 [
     "KUOI",
     "https://s2.radio.co/sedf30688d/listen"
+],
+[
+    "KRFY",
+    "http://199.231.117.18:8004/listen.m3u"
+],
+[
+    "KORR",
+    "https://ice24.securenetsystems.net/KORR2"
+],
+[
+    "KDPI",
+    "https://peridot.streamguys1.com:5115/live"
 ]]
