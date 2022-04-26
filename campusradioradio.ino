@@ -35,8 +35,8 @@ Audio audio;
 uint8_t volume = 0;
 
 // STATIONS
-// #define JSON_HOST "https://raw.githubusercontent.com/marchingband/campusradioradio/main/stations.json"
-#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations.json"
+// #define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations.json"
+#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations-idaho.json"
 Preferences preferences;
 struct SpiRamAllocator {
     void* allocate(size_t size) {
@@ -226,6 +226,12 @@ static void audio_task(void* arg)
     audio.setVolume(0);
     for(;;)
     {
+        // guard against bad station indexes
+        if( current_station > num_stations)
+        {
+            current_station = num_stations;
+        }
+
         if(current_station != last_station)
         {
             last_station = current_station < (num_stations - 1) ? current_station : (num_stations - 1);
