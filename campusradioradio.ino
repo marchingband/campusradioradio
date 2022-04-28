@@ -35,8 +35,8 @@ Audio audio;
 uint8_t volume = 0;
 
 // STATIONS
-// #define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations.json"
-#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations-idaho.json"
+#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations.json" // canada
+// #define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations-idaho.json" // idaho
 Preferences preferences;
 struct SpiRamAllocator {
     void* allocate(size_t size) {
@@ -238,10 +238,16 @@ static void audio_task(void* arg)
             buffering_audio = true;
             JsonArray data = stations->as<JsonArray>();
             JsonArray station_data = data[last_station].as<JsonArray>();
+            const char* station_callsign = station_data[0];
             const char* station_host = station_data[1];
-            // log_i("connecting to %s %s", station_callsign, station_host);
-            audio.connecttohost(station_host);
-            // audio.connecttohost(stations[last_station][1].as<const char*>());
+            log_i("connecting to %s %s", station_callsign, station_host);
+            bool connected_to_stream = false;
+            while(!connected_to_stream)
+            {
+                log_i("try connect to stream");
+                connected_to_stream = audio.connecttohost(station_host);
+            }
+            // audio.connecttohost(station_host);
             audio.setVolume(volume);
             buffering_audio = false;
         }
