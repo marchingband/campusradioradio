@@ -35,8 +35,8 @@ Audio audio;
 uint8_t volume = 0;
 
 // STATIONS
-#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations.json" // canada
-// #define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations-idaho.json" // idaho
+// #define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations.json" // canada
+#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations-idaho.json" // idaho
 Preferences preferences;
 struct SpiRamAllocator {
     void* allocate(size_t size) {
@@ -74,6 +74,7 @@ void readVolume(void)
 {
     static int pot = 0;
     static int reads = 0;
+    
     int new_pot = analogRead(VOLUME_PIN);
 
     // discharge the adc pin
@@ -104,17 +105,6 @@ void readVolume(void)
         should_wake_display = true;
         log_i("pot: %d %d", pot, volume);
     }
-
-    // float new_volume_f = 21 - (((float)new_pot / 4095) * 21);
-    // uint8_t new_volume = (uint8_t)new_volume_f;
-    // log_i("nvf:%f nv:%d", new_volume_f, new_volume);
-    // if(abs(new_volume - volume) > 0) // if the volume has changed by at least 1
-    // {
-    //     pot = 4096 - ((new_volume * 195) + 98); // place the pot value in the median value for that range
-    //     volume = new_volume;
-    //     audio.setVolume(volume); // 0...21
-    //     log_i("pot: %d %d", pot, volume);
-    // }
 }
 
 void on_radio_encoder(bool up)
@@ -222,6 +212,7 @@ static void ui_task(void* arg)
 static void audio_task(void* arg)
 {
     static int last_station = -1;
+    audio.setBufsize(-1, 3000000); // -1 is no ram, 3MB psram (defualt is 300k)
     audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
     audio.setVolume(0);
     for(;;)
@@ -229,7 +220,7 @@ static void audio_task(void* arg)
         // guard against bad station indexes
         if( current_station > num_stations)
         {
-            current_station = num_stations-1;
+            current_station = 0;
         }
 
         if(current_station != last_station)
@@ -242,7 +233,7 @@ static void audio_task(void* arg)
             const char* station_host = station_data[1];
             log_i("connecting to %s %s", station_callsign, station_host);
             bool connected_to_stream = false;
-            while(!connected_to_stream)
+            while(!connected_to_stream) // keep retrying if connection fails
             {
                 log_i("try connect to stream");
                 connected_to_stream = audio.connecttohost(station_host);
