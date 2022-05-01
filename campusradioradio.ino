@@ -35,8 +35,8 @@ Audio audio;
 uint8_t volume = 0;
 
 // STATIONS
-// #define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations.json" // canada
-#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations-idaho.json" // idaho
+#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations.json" // canada
+// #define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations-idaho.json" // idaho
 Preferences preferences;
 struct SpiRamAllocator {
     void* allocate(size_t size) {
@@ -133,6 +133,95 @@ void configModeCallback (WiFiManager *myWiFiManager)
     captive_portal_on = true;
 }
 
+#define DBNC_VAL 5
+#define HIGH_TOUCH_THRESH 40
+#define LOW_TOUCH_THRESH 30
+
+static void read_touch_pads(void)
+{
+    static bool up_state = false;
+    static bool down_state = false;
+    static int up_pushed = false;
+    static int down_pushed = false;
+    int up_val = touchRead(32);
+    int down_val = touchRead(33);
+    // log_i("up %d, down %d", up_val, down_val);
+
+    if(up_val > HIGH_TOUCH_THRESH)
+    {
+        up_pushed -= (up_pushed > 0);
+    }
+    else if(up_val < LOW_TOUCH_THRESH)
+    {
+        up_pushed += (up_pushed < DBNC_VAL);
+    }
+    if(down_val > HIGH_TOUCH_THRESH)
+    {
+        down_pushed -= (down_pushed > 0);
+    }
+    else if(down_val < LOW_TOUCH_THRESH)
+    {
+        down_pushed += (down_pushed < DBNC_VAL);
+    }
+    if(
+        (!down_state) &&
+        (down_pushed == DBNC_VAL)
+    )
+    {
+        down_state = true;
+        log_d("down %d", down_val);
+        on_radio_encoder(false);
+    }
+    if(
+        (down_state) &&
+        (down_pushed == 0)
+    )
+    {
+        down_state = false;
+        log_d("down release %d", down_val);
+    }
+    if(
+        (!up_state) &&
+        (up_pushed == DBNC_VAL)
+    )
+    {
+        up_state = true;
+        log_d("up %d", up_val);
+        on_radio_encoder(true);
+    }
+    if(
+        (up_state) &&
+        (up_pushed == 0)
+    )
+    {
+        up_state = false;
+        log_d("up release %d", up_val);
+    }
+
+
+    // if((!up_pushed) && (up_val <= 20))
+    // {
+    //     up_pushed = true;
+    //     log_i("up %d", up_val);
+    // }
+    // if((up_pushed) && (up_val > 20))
+    // {
+    //     up_pushed = false;
+    //     log_i("up release %d", up_val);
+    // }
+    // if((!down_pushed) && (down_val <= 20))
+    // {
+    //     down_pushed = true;
+    //     log_i("down %d", down_val);
+    // }
+    // if((down_pushed) && (down_val > 20))
+    // {
+    //     down_pushed = false;
+    //     log_i("down release %d", down_val);
+    // }
+    // delay(200);
+}
+
 static void ui_task(void* arg)
 {
     static int last_station  = -1;
@@ -200,6 +289,7 @@ static void ui_task(void* arg)
             show_dot = !show_dot;
         }
         readVolume();
+        read_touch_pads();
         if(should_sleep())
         {
             display.clearDisplay();
@@ -225,17 +315,16 @@ static void audio_task(void* arg)
 
         if(current_station != last_station)
         {
-            last_station = current_station < (num_stations - 1) ? current_station : (num_stations - 1);
-            buffering_audio = true;
-            JsonArray data = stations->as<JsonArray>();
-            JsonArray station_data = data[last_station].as<JsonArray>();
-            const char* station_callsign = station_data[0];
-            const char* station_host = station_data[1];
-            log_i("connecting to %s %s", station_callsign, station_host);
             bool connected_to_stream = false;
             while(!connected_to_stream) // keep retrying if connection fails
             {
-                log_i("try connect to stream");
+                last_station = current_station < (num_stations - 1) ? current_station : (num_stations - 1);
+                buffering_audio = true;
+                JsonArray data = stations->as<JsonArray>();
+                JsonArray station_data = data[last_station].as<JsonArray>();
+                const char* station_callsign = station_data[0];
+                const char* station_host = station_data[1];
+                log_i("connecting to %s %s", station_callsign, station_host);
                 connected_to_stream = audio.connecttohost(station_host);
             }
             // audio.connecttohost(station_host);
@@ -299,10 +388,12 @@ void setup()
     current_station = preferences.getUInt("station", 0);
 
     pinMode(VOLUME_PIN, INPUT);
-    pinMode(ENC_PUSH, INPUT_PULLUP);
+    pinMode(34, INPUT);
+    pinMode(35, INPUT);
+    // pinMode(ENC_PUSH, INPUT_PULLUP);
 
-    encoder_init();
-    on_encoder = on_radio_encoder;
+    // encoder_init();
+    // on_encoder = on_radio_encoder;
 
     xTaskCreatePinnedToCore(ui_task, "ui_task", 4096, NULL, 3, NULL, 1);
 
@@ -310,8 +401,9 @@ void setup()
     WiFiManager wm;
     // wm.resetSettings();
     wm.setAPCallback(configModeCallback);
-    int normal_mode = digitalRead(ENC_PUSH);
-    log_i("enc push %s", normal_mode == 1 ? "high" : "low");
+    int normal_mode = 1; // bypass 
+    // int normal_mode = digitalRead(ENC_PUSH);
+    // log_i("enc push %s", normal_mode == 1 ? "high" : "low");
     if(normal_mode == 0)
     {
         captive_portal_on = true;
@@ -341,36 +433,36 @@ void loop(){
     // vTaskDelete(NULL);
 }
  
-void audio_info(const char *info){
-    Serial.print("info        "); Serial.println(info);
-}
-void audio_id3data(const char *info){  //id3 metadata
-    Serial.print("id3data     ");Serial.println(info);
-}
-void audio_eof_mp3(const char *info){  //end of file
-    Serial.print("eof_mp3     ");Serial.println(info);
-}
-void audio_showstation(const char *info){
-    Serial.print("station     ");Serial.println(info);
-}
-void audio_showstreaminfo(const char *info){
-    Serial.print("streaminfo  ");Serial.println(info);
-}
-void audio_showstreamtitle(const char *info){
-    Serial.print("streamtitle ");Serial.println(info);
-}
-void audio_bitrate(const char *info){
-    Serial.print("bitrate     ");Serial.println(info);
-}
-void audio_commercial(const char *info){  //duration in sec
-    Serial.print("commercial  ");Serial.println(info);
-}
-void audio_icyurl(const char *info){  //homepage
-    Serial.print("icyurl      ");Serial.println(info);
-}
-void audio_lasthost(const char *info){  //stream URL played
-    Serial.print("lasthost    ");Serial.println(info);
-}
-void audio_eof_speech(const char *info){
-    Serial.print("eof_speech  ");Serial.println(info);
-}
+// void audio_info(const char *info){
+//     Serial.print("info        "); Serial.println(info);
+// }
+// void audio_id3data(const char *info){  //id3 metadata
+//     Serial.print("id3data     ");Serial.println(info);
+// }
+// void audio_eof_mp3(const char *info){  //end of file
+//     Serial.print("eof_mp3     ");Serial.println(info);
+// }
+// void audio_showstation(const char *info){
+//     Serial.print("station     ");Serial.println(info);
+// }
+// void audio_showstreaminfo(const char *info){
+//     Serial.print("streaminfo  ");Serial.println(info);
+// }
+// void audio_showstreamtitle(const char *info){
+//     Serial.print("streamtitle ");Serial.println(info);
+// }
+// void audio_bitrate(const char *info){
+//     Serial.print("bitrate     ");Serial.println(info);
+// }
+// void audio_commercial(const char *info){  //duration in sec
+//     Serial.print("commercial  ");Serial.println(info);
+// }
+// void audio_icyurl(const char *info){  //homepage
+//     Serial.print("icyurl      ");Serial.println(info);
+// }
+// void audio_lasthost(const char *info){  //stream URL played
+//     Serial.print("lasthost    ");Serial.println(info);
+// }
+// void audio_eof_speech(const char *info){
+//     Serial.print("eof_speech  ");Serial.println(info);
+// }
