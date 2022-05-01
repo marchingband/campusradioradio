@@ -225,22 +225,21 @@ static void audio_task(void* arg)
 
         if(current_station != last_station)
         {
-            last_station = current_station < (num_stations - 1) ? current_station : (num_stations - 1);
-            buffering_audio = true;
-            JsonArray data = stations->as<JsonArray>();
-            JsonArray station_data = data[last_station].as<JsonArray>();
-            const char* station_callsign = station_data[0];
-            const char* station_host = station_data[1];
-            log_i("connecting to %s %s", station_callsign, station_host);
             bool connected_to_stream = false;
             while(!connected_to_stream) // keep retrying if connection fails
             {
-                log_i("try connect to stream");
+                last_station = current_station < (num_stations - 1) ? current_station : (num_stations - 1);
+                buffering_audio = true;
+                JsonArray data = stations->as<JsonArray>();
+                JsonArray station_data = data[last_station].as<JsonArray>();
+                const char* station_callsign = station_data[0];
+                const char* station_host = station_data[1];
+                log_i("connecting to %s %s", station_callsign, station_host);
                 connected_to_stream = audio.connecttohost(station_host);
+                // audio.connecttohost(station_host);
+                audio.setVolume(volume);
+                buffering_audio = false;
             }
-            // audio.connecttohost(station_host);
-            audio.setVolume(volume);
-            buffering_audio = false;
         }
         audio.loop();
     }
