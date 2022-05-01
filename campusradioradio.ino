@@ -35,8 +35,8 @@ Audio audio;
 uint8_t volume = 0;
 
 // STATIONS
-// #define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations.json" // canada
-#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations-idaho.json" // idaho
+#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations.json" // canada
+// #define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations-idaho.json" // idaho
 Preferences preferences;
 struct SpiRamAllocator {
     void* allocate(size_t size) {
