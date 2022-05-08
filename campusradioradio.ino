@@ -238,8 +238,8 @@ static void audio_task(void* arg)
                 connected_to_stream = audio.connecttohost(station_host);
                 // audio.connecttohost(station_host);
                 audio.setVolume(volume);
-                buffering_audio = false;
             }
+            buffering_audio = false;
         }
         audio.loop();
     }
