@@ -107,23 +107,59 @@ void readVolume(void)
     }
 }
 
+
+int8_t treble = -40;
+int8_t bass = 6;
+int8_t menu_state = 0; // 0=home,1=bass,2=treb (-40 ... +6 (dB))
+bool should_set_tone = false;
+// setTone(int8_t gainLowPass, int8_t gainBandPass, int8_t gainHighPass)
+
 void on_radio_encoder(bool up)
 {
     use_screen();
     should_wake_display = true;
-    int new_station = current_station;
-    if(up)
-    {
-        new_station += (current_station < (num_stations - 1));
-    }
-    else
-    {
-        new_station -= (current_station > 0);
-    }
-    if(new_station != current_station)
-    {
-        current_station = new_station;
-        preferences.putUInt("station", current_station);
+    switch(menu_state){
+        case 0: {
+            int new_station = current_station;
+            if(up)
+            {
+                new_station += (current_station < (num_stations - 1));
+            }
+            else
+            {
+                new_station -= (current_station > 0);
+            }
+            if(new_station != current_station)
+            {
+                current_station = new_station;
+                preferences.putUInt("station", current_station);
+            }
+            break;
+        }
+        case 1: {
+            if(up)
+            {
+                bass += (bass < 6);
+            }
+            else
+            {
+                bass -= (bass > -40);
+            }
+            should_set_tone = true;
+            break;
+        }
+        case 2: {
+            if(up)
+            {
+                treble += (treble < 6);
+            }
+            else
+            {
+                treble -= (treble > -40);
+            }
+            should_set_tone = true;
+            break;
+        }
     }
 }
 
@@ -215,12 +251,19 @@ static void audio_task(void* arg)
     audio.setBufsize(-1, 3000000); // -1 is no ram, 3MB psram (defualt is 300k)
     audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
     audio.setVolume(0);
+    audio.setTone(bass, 0, treble);
     for(;;)
     {
         // guard against bad station indexes
         if( current_station > num_stations)
         {
             current_station = 0;
+        }
+
+        if(should_change_tone)
+        {
+            should_change_tone = false;
+            audio.setTone(bass, 0, treble);
         }
 
         if(current_station != last_station)
