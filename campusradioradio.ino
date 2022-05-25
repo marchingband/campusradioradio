@@ -17,6 +17,8 @@
 #define ENC_PUSH 19
 #define ENC_A 34
 #define ENC_B 35
+#define ENC_DEBOUNCE_TIME_MS 500
+unsigned long last_enc_push = 0;
 
 // OLED
 #define OLED_RESET -1 // no reset pin
@@ -73,7 +75,7 @@ void use_screen(void){
 }
 
 bool should_sleep(void){
-    return(millis() - last_display_update > (1000 * DISPLAY_ON_SECONDS));
+    return((millis() - last_display_update) > (1000 * DISPLAY_ON_SECONDS));
 }
 
 void readVolume(void)
@@ -214,7 +216,6 @@ static void ui_task(void* arg)
         }
         else 
         {
-            use_screen();
             switch(menu_state){
                 case 0: {
                     if(
@@ -272,6 +273,7 @@ static void ui_task(void* arg)
         {
             display.clearDisplay();
             display.display();
+            menu_state = 0;
         }
         vTaskDelay(10);
     }
@@ -411,9 +413,6 @@ void setup()
         xTaskCreatePinnedToCore(audio_task, "audio_task", 8000, NULL, 3  | portPRIVILEGE_BIT, NULL, 0);
     }
 }
-
-#define ENC_DEBOUNCE_TIME_MS 500
-unsigned long last_enc_push = 0;
 
 void check_enc_push(void)
 {
