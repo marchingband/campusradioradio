@@ -52,6 +52,12 @@ struct SpiRamAllocator {
 typedef BasicJsonDocument<SpiRamAllocator> SpiRamJsonDocument;
 SpiRamJsonDocument *stations;
 
+// TONE
+int8_t treble = 0;
+int8_t bass = 0;
+int8_t menu_state = 0; // 0=home,1=bass,2=treb (-40 ... +6 (dB))
+bool should_set_tone = false;
+
 // VARS
 unsigned int current_station;
 bool captive_portal_on = false;
@@ -107,13 +113,6 @@ void readVolume(void)
     }
 }
 
-
-int8_t treble = -40;
-int8_t bass = 6;
-int8_t menu_state = 0; // 0=home,1=bass,2=treb (-40 ... +6 (dB))
-bool should_set_tone = false;
-// setTone(int8_t gainLowPass, int8_t gainBandPass, int8_t gainHighPass)
-
 void on_radio_encoder(bool up)
 {
     use_screen();
@@ -146,6 +145,8 @@ void on_radio_encoder(bool up)
                 bass -= (bass > -40);
             }
             should_set_tone = true;
+            preferences.putInt("bass", bass);
+            log_i("bass %d", bass);
             break;
         }
         case 2: {
@@ -158,6 +159,8 @@ void on_radio_encoder(bool up)
                 treble -= (treble > -40);
             }
             should_set_tone = true;
+            preferences.putInt("treble", treble);
+            log_i("treble %d", treble);
             break;
         }
     }
@@ -209,24 +212,53 @@ static void ui_task(void* arg)
             display.clearDisplay();
             display.display();
         }
-        else if(
-            (current_station != last_station) ||
-            should_wake_display
-        )
+        else 
         {
-            should_wake_display = false;
             use_screen();
-            last_station = current_station;
+            switch(menu_state){
+                case 0: {
+                    if(
+                        (current_station != last_station) ||
+                        should_wake_display
+                    )
+                    {
+                        should_wake_display = false;
+                        use_screen();
+                        last_station = current_station;
 
-            JsonArray data = stations->as<JsonArray>();
-            JsonArray station_data = data[last_station].as<JsonArray>();
-            const char* station_callsign = station_data[0];
+                        JsonArray data = stations->as<JsonArray>();
+                        JsonArray station_data = data[last_station].as<JsonArray>();
+                        const char* station_callsign = station_data[0];
 
-            display.clearDisplay();
-            display.setFont(&FreeSans18pt7b);
-            display.setCursor(10, 28);
-            display.println(station_callsign);
-            display.display();
+                        display.clearDisplay();
+                        display.setFont(&FreeSans18pt7b);
+                        display.setCursor(10, 28);
+                        display.println(station_callsign);
+                        display.display();
+                    }
+                    break;
+                };
+                case 1: {
+                    char str[20];
+                    sprintf(str, "BASS  %d", bass);
+                    display.clearDisplay();
+                    display.setFont(&FreeSans9pt7b);
+                    display.setCursor(10, 20);
+                    display.println(str);
+                    display.display();
+                    break;
+                };
+                case 2: {
+                    char str[20];
+                    sprintf(str, "TREBLE  %d", treble);
+                    display.clearDisplay();
+                    display.setFont(&FreeSans9pt7b);
+                    display.setCursor(10, 20);
+                    display.println(str);
+                    display.display();
+                    break;
+                };
+            }
         }
         if( buffering_audio || !wifi_connected || show_dot )
         {
@@ -260,9 +292,9 @@ static void audio_task(void* arg)
             current_station = 0;
         }
 
-        if(should_change_tone)
+        if(should_set_tone)
         {
-            should_change_tone = false;
+            should_set_tone = false;
             audio.setTone(bass, 0, treble);
         }
 
@@ -339,6 +371,8 @@ void setup()
 
     preferences.begin("eeprom", false);
     current_station = preferences.getUInt("station", 0);
+    bass = preferences.getInt("bass", 0);
+    treble = preferences.getInt("treble", 0);
 
     pinMode(VOLUME_PIN, INPUT);
     pinMode(ENC_PUSH, INPUT_PULLUP);
@@ -378,8 +412,29 @@ void setup()
     }
 }
 
+#define ENC_DEBOUNCE_TIME_MS 500
+unsigned long last_enc_push = 0;
+
+void check_enc_push(void)
+{
+    int n_pushed = digitalRead(ENC_PUSH);
+    if(!n_pushed)
+    {
+        unsigned long now = millis();
+        if((now - last_enc_push) > ENC_DEBOUNCE_TIME_MS)
+        {
+            should_wake_display = true;
+            last_enc_push = now;
+            use_screen();
+            menu_state = menu_state < 2 ? menu_state + 1 : 0;
+            log_i("menu state %d", menu_state);
+        }
+    }
+}
+
 void loop(){
-    vTaskDelay(1000);
+    check_enc_push();
+    // vTaskDelay(1000);
     // vTaskDelete(NULL);
 }
  
