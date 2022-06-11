@@ -101,10 +101,10 @@
         moving_station = true
     }
     document.addEventListener("mousedown", e=> play())
-    document.addEventListener("touchstart", e=> {
+    document.ontouchstart = e=> {
         e.preventDefault()
         play()
-    })
+    }
     document.addEventListener("mousemove", e=> {
         play()
         if(moving_volume){
@@ -140,10 +140,9 @@
             }
         }
     })
-    document.addEventListener("touchmove", e=> {
+    document.ontouchmove = e=> {
         e.preventDefault()
         play()
-        console.log(e)
         if(moving_volume){
             change = clickY - e.touches[0].clientY
             if(change > 10){
@@ -176,20 +175,19 @@
                 clickY = e.touches[0].clientY
             }
         }
-    })
+    }
     document.addEventListener("mouseup", e=> {
         document.getElementsByTagName("body")[0].style.cursor = "default"
         moving_volume = false;
         moving_station = false;
     })
-    document.addEventListener("touchend", e=> {
+    document.ontouchend = e => {
         e.preventDefault()
-        console.log("end")
         document.getElementsByTagName("body")[0].style.cursor = "default"
         moving_volume = false;
         moving_station = false;
         play()
-    })
+    }
     const play = () => {
         audio.play().catch(console.error)
         playing=true
