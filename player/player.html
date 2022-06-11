@@ -1,4 +1,5 @@
-<html>
+<html style="margin: 0;padding: 0;overscroll-behavior:none">
+<body style="margin: 0;padding: 0;overscroll-behavior:none">
     <h1 style="margin-left:auto;margin-right:auto;text-align:center;user-select:none">
         CAMPUS RADIO RADIO
     </h1>
@@ -44,140 +45,191 @@
     <h1 style="margin-left:auto;margin-right:auto;text-align:center;user-select:none;">
         RADIO CAMPUS RADIO
     </h1>
-    <script>
-        var screen = document.getElementById("screen")
-        var volume_knob = document.getElementById("volume")
-        var station_knob = document.getElementById("station")
-        var flasher = document.getElementById("flasher")
-        var stations;
-        var num_stations;
-        var callsign;
-        var url;
-        var station = 0;
-        var audio;
-        var volume = 1.0;
-        var clickY;
-        var moving_volume = false;
-        var moving_station = false;
-        var loading = false
-        var flash = true
-        window.setInterval(()=>{
-            if(loading){
-                if(flash){
-                    flash = false
-                    flasher.style.display='none'
+</body>
+<script>
+    var screen = document.getElementById("screen")
+    var volume_knob = document.getElementById("volume")
+    var station_knob = document.getElementById("station")
+    var flasher = document.getElementById("flasher")
+    var stations;
+    var num_stations;
+    var callsign;
+    var url;
+    var station = 0;
+    var audio;
+    var volume = 1.0;
+    var clickY;
+    var moving_volume = false;
+    var moving_station = false;
+    var loading = false
+    var flash = true
+    window.setInterval(()=>{
+        if(loading){
+            if(flash){
+                flash = false
+                flasher.style.display='none'
+            } else {
+                flash = true
+                flasher.style.display='inline'
+            }
+        }
+    },100)
+    volume_knob.addEventListener("mousedown", e=> {
+        document.getElementsByTagName("body")[0].style.cursor = "row-resize"
+        clickY=e.clientY
+        moving_volume = true
+    })
+    volume_knob.addEventListener("touchstart", e=> {
+        document.getElementsByTagName("body")[0].style.cursor = "row-resize"
+        clickY=e.clientY
+        moving_volume = true
+    })
+    station_knob.addEventListener("mousedown", e=> {
+        document.getElementsByTagName("body")[0].style.cursor = "row-resize"
+        clickY=e.clientY
+        moving_station = true
+    })
+    station_knob.addEventListener("touchstart", e=> {
+        document.getElementsByTagName("body")[0].style.cursor = "row-resize"
+        clickY=e.clientY
+        moving_station = true
+    })
+    document.addEventListener("mousedown", e=> play())
+    document.addEventListener("touchstart", e=> play())
+    document.addEventListener("mousemove", e=> {
+        if(moving_volume){
+            change = clickY - e.clientY
+            if(change > 10){
+                set_volume(true)
+                clickY = e.clientY
+            }else if(change < (-10)){
+                set_volume(false)
+                clickY = e.clientY
+            }
+        }else if (moving_station){
+            change = clickY - e.clientY
+            if((change > 10) && (station < (num_stations - 1))){
+                tune(true)
+                if(!audio.loaded)
+                if(audio.duration > 0){
+                    tune_in()
                 } else {
-                    flash = true
-                    flasher.style.display='inline'
+                    audio.removeEventListener("playing", tune_in)
+                    audio.addEventListener("playing", tune_in)
                 }
-            }
-        },100)
-        volume_knob.addEventListener("mousedown", e=> {
-            document.getElementsByTagName("body")[0].style.cursor = "row-resize"
-            clickY=e.clientY
-            moving_volume = true
-        })
-        station_knob.addEventListener("mousedown", e=> {
-            document.getElementsByTagName("body")[0].style.cursor = "row-resize"
-            clickY=e.clientY
-            moving_station = true
-        })
-        document.addEventListener("mousedown", e=> play())
-        document.addEventListener("mousemove", e=> {
-            if(moving_volume){
-                change = clickY - e.clientY
-                if(change > 10){
-                    set_volume(true)
-                    clickY = e.clientY
-                }else if(change < (-10)){
-                    set_volume(false)
-                    clickY = e.clientY
+                clickY = e.clientY
+            }else if((change < -10) && (station > 0)){
+                tune(false)
+                if(audio.duration > 0){
+                    tune_in()
+                } else {
+                    audio.removeEventListener("playing", tune_in)
+                    audio.addEventListener("playing", tune_in)
                 }
-            }else if (moving_station){
-                change = clickY - e.clientY
-                if((change > 10) && (station < (num_stations - 1))){
-                    tune(true)
-                    if(!audio.loaded)
-                    if(audio.duration > 0){
-                        tune_in()
-                    } else {
-                        audio.removeEventListener("playing", tune_in)
-                        audio.addEventListener("playing", tune_in)
-                    }
-                    clickY = e.clientY
-                }else if((change < -10) && (station > 0)){
-                    tune(false)
-                    if(audio.duration > 0){
-                        tune_in()
-                    } else {
-                        audio.removeEventListener("playing", tune_in)
-                        audio.addEventListener("playing", tune_in)
-                    }
-                    clickY = e.clientY
+                clickY = e.clientY
+            }
+        }
+    })
+    document.addEventListener("touchmove", e=> {
+        if(moving_volume){
+            change = clickY - e.clientY
+            if(change > 10){
+                set_volume(true)
+                clickY = e.clientY
+            }else if(change < (-10)){
+                set_volume(false)
+                clickY = e.clientY
+            }
+        }else if (moving_station){
+            change = clickY - e.clientY
+            if((change > 10) && (station < (num_stations - 1))){
+                tune(true)
+                if(!audio.loaded)
+                if(audio.duration > 0){
+                    tune_in()
+                } else {
+                    audio.removeEventListener("playing", tune_in)
+                    audio.addEventListener("playing", tune_in)
                 }
+                clickY = e.clientY
+            }else if((change < -10) && (station > 0)){
+                tune(false)
+                if(audio.duration > 0){
+                    tune_in()
+                } else {
+                    audio.removeEventListener("playing", tune_in)
+                    audio.addEventListener("playing", tune_in)
+                }
+                clickY = e.clientY
             }
+        }
+    })
+    document.addEventListener("mouseup", e=> {
+        document.getElementsByTagName("body")[0].style.cursor = "default"
+        moving_volume = false;
+        moving_station = false;
+    })
+    document.addEventListener("touchend", e=> {
+        document.getElementsByTagName("body")[0].style.cursor = "default"
+        moving_volume = false;
+        moving_station = false;
+    })
+    const play = () => {
+        audio.play().catch(console.error)
+        audio.addEventListener("playing", e=>{
+            loading=false
         })
-        document.addEventListener("mouseup", e=> {
-            document.getElementsByTagName("body")[0].style.cursor = "default"
-            moving_volume = false;
-            moving_station = false;
-        })
-        const play = () => {
-            audio.play().catch(console.error)
-            audio.addEventListener("playing", e=>{
-                loading=false
-            })
+    }
+    const tune_in = async() => {
+        try{
+            audio.pause()
+        }catch(e){
+            console.error(e)
         }
-        const tune_in = async() => {
-            try{
-                audio.pause()
-            }catch(e){
-                console.error(e)
-            }
-            loading=true
-            callsign = stations[station][0]
-            url = stations[station][1];
-            audio = new Audio(url)
-            audio.volume = volume;
-            play()
-            screen.innerText = callsign
-        }
-        const tune = async(up) => {
-            if(up && station < (num_stations - 1)){
-                station ++
-                callsign = stations[station][0]
-                url = stations[station][1]
-                screen.innerText = callsign
-                station_knob.style.transform = "rotate(" + station / num_stations + "turn)"
-            }
-            else if (!up && station > 0){
-                station --
-                callsign = stations[station][0]
-                url = stations[station][1]
-                screen.innerText = callsign
-                station_knob.style.transform = "rotate(" + station / num_stations + "turn)"
-            }
-        }
-        const set_volume = up => {
-            if(up && volume < 1.0){
-                volume += 0.1
-                audio.volume = volume
-                volume_knob.style.transform = "rotate(" + ((volume * 0.7) + 0.3) + "turn)"
-            } else if(!up && (volume > 0.1)){
-                volume -= 0.1
-                audio.volume = volume
-                volume_knob.style.transform = "rotate(" + ((volume * 0.7) + 0.3) + "turn)"
-            }
-        }
-        const run = async()=> {
-            stations = await fetch("https://marchingband.github.io/campusradioradio/data/stations.json").then(r=>r.json()).then(json=>json.filter(x=>x[1].startsWith("https")))
-            num_stations = stations.length
+        loading=true
+        callsign = stations[station][0]
+        url = stations[station][1];
+        audio = new Audio(url)
+        audio.volume = volume;
+        play()
+        screen.innerText = callsign
+    }
+    const tune = async(up) => {
+        if(up && station < (num_stations - 1)){
+            station ++
             callsign = stations[station][0]
             url = stations[station][1]
-            audio = new Audio(url)
-            audio.volume = volume
             screen.innerText = callsign
+            station_knob.style.transform = "rotate(" + station / num_stations + "turn)"
         }
-        run()
-    </script>
+        else if (!up && station > 0){
+            station --
+            callsign = stations[station][0]
+            url = stations[station][1]
+            screen.innerText = callsign
+            station_knob.style.transform = "rotate(" + station / num_stations + "turn)"
+        }
+    }
+    const set_volume = up => {
+        if(up && volume < 1.0){
+            volume += 0.1
+            audio.volume = volume
+            volume_knob.style.transform = "rotate(" + ((volume * 0.7) + 0.3) + "turn)"
+        } else if(!up && (volume > 0.1)){
+            volume -= 0.1
+            audio.volume = volume
+            volume_knob.style.transform = "rotate(" + ((volume * 0.7) + 0.3) + "turn)"
+        }
+    }
+    const run = async()=> {
+        stations = await fetch("https://marchingband.github.io/campusradioradio/data/stations.json").then(r=>r.json()).then(json=>json.filter(x=>x[1].startsWith("https")))
+        num_stations = stations.length
+        callsign = stations[station][0]
+        url = stations[station][1]
+        audio = new Audio(url)
+        audio.volume = volume
+        screen.innerText = callsign
+    }
+    run()
+</script>
 </html>
