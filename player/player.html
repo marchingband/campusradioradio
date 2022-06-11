@@ -1,56 +1,190 @@
-<html style="margin:0;padding:0;overscroll-behavior:none;overscroll-behavior-y:none;overflow:hidden">
-<body style="position:fixed;margin:0;padding:0;overscroll-behavior:none;overscroll-behavior-y:none;width:100%;height:100%;overflow:hidden">
+<html>
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no">
+<body>
+<div class="container" id="container">
     <h1 style="margin-left:auto;margin-right:auto;text-align:center;user-select:none">
         CAMPUS RADIO RADIO
     </h1>
-    <div style="width:400;height:200;border:10px solid gold;border-radius:10px;display:flex;flex-direction:row;justify-content:space-around;margin:auto">
+    <div class="radio" id="radio">
         <!-- speaker -->
-        <div style="width:180;height:180;margin:7;border:3px solid grey;border-radius:90px"></div>
+        <div class="speaker"></div>
         <!-- console -->
-        <div style="width:200;height:200;display:flex;flex-direction:column;align-items:center">
+        <div class="console">
             <!-- screen -->
-            <div style="width:80;height:30;margin:20;border:3px solid grey;display:flex;align-items:center;justify-content:center;user-select: none;position:relative;">
+            <div class="screen">
                 <div id="screen"></div>
                 <div id="flasher" style="position:absolute;right:5;font-size:8px">
                     ●
                 </div>
             </div>
             <!-- knobs -->
-            <div style="width:200;height:80;display:flex;flex-direction:row;justify-content:space-around;margin-top:auto">
+            <div class="knobs">
                 <!-- station -->
-                <div style="width:200;height:80;display:flex;flex-direction:column;align-items: center;margin-top:auto">
+                <div class="knob">
                     <div id="station" style="width:40;height:40;border:3px solid grey;border-radius:40px;display:flex;cursor:row-resize;">
                         <div style="margin-right:auto;margin-top:auto;user-select:none;">
                             ●
                         </div>
                     </div>
-                    <div style="font-size:11px;font-weight:bold;margin-top:5px;user-select:none;">
+                    <div style="font-weight:bold;margin-top:5px;user-select:none;">
                         TUNE
                     </div>
                 </div>
                 <!-- volume -->
-                <div style="width:200;height:80;display:flex;flex-direction:column;align-items: center;margin-top:auto">
+                <div class="knob">
                     <div id="volume" style="width:40;height:40;border:3px solid grey;border-radius:40px;display:flex;cursor:row-resize;">
                         <div style="margin-left:auto;margin-top:auto;user-select:none;">
                             ●
                         </div>
                     </div>
-                    <div style="font-size:11px;font-weight:bold;margin-top:5px;user-select:none;">
+                    <div style="font-weight:bold;margin-top:5px;user-select:none;">
                         VOLUME
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <h1 style="margin-left:auto;margin-right:auto;text-align:center;user-select:none;">
+    <h1 id="footer" style="margin-left:auto;margin-right:auto;text-align:center;user-select:none;">
         RADIO CAMPUS RADIO
     </h1>
+    <div class="mobile_control" id="mobile_control">
+        <div class="mobile_button" onclick="set_volume(true)">
+            <div>
+                +
+            </div>
+        </div>
+        <div class="mobile_button" onclick="set_volume(false)">
+            <div>
+                -
+            </div>
+        </div>
+        <div class="mobile_button" onclick="tune(true);tune_in()">
+            <div>
+                △
+            </div>
+        </div>
+        <div class="mobile_button" onclick="tune(false);tune_in()">
+            <div>
+                ▽
+            </div>
+        </div>
+    </div>
+</div>
 </body>
+<style>
+    html {
+        margin:0;
+        padding:0;
+        overscroll-behavior:none;
+        overscroll-behavior-y:none;
+        overflow:hidden
+    }
+    body {
+        /* position:fixed; */
+        margin:0;
+        padding:0;
+        /* overscroll-behavior:none;
+        overscroll-behavior-y:none; */
+        width:100%;
+        height:100%;
+        /* overflow:hidden; */
+        display: flex;
+        flex-direction: column;
+    }
+    .container {
+        display: flex;
+        flex-direction: column;
+    }
+    .radio {
+        width:80vw;
+        height:40vw;
+        border:10px solid gold;
+        border-radius:10px;
+        display:flex;
+        flex-direction:row;
+        justify-content:space-around;
+        margin:auto;
+        background-color: white;
+    }
+    .speaker {
+        width:35vw;
+        height:35vw;
+        margin:2vw;
+        border:3px solid grey;
+        border-radius:35vw
+    }
+    .console {
+        width:35vw;
+        /* height:35vw; */
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        /* border: 1px solid red */
+    }
+    .screen {
+        width:16vw;
+        height:6vw;
+        margin:4vw;
+        border:3px solid grey;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        user-select: none;
+        position:relative;
+        font-size: 3.5vw;
+    }
+    .knobs {
+        width:30vw;
+        /* height:6vw; */
+        display:flex;
+        flex-direction:row;
+        justify-content:space-around;
+        /* align-items: center; */
+        /* justify-content: center; */
+        margin-top:auto;
+        margin-bottom: 3vw;
+        /* border: 1px solid green; */
+    }
+    .knob {
+        /* width:200; */
+        /* height:80; */
+        display:flex;
+        flex-direction:column;
+        align-items: center;
+        margin-top:auto;
+        font-size: 2vw;
+        /* border: 1px solid blue; */
+    }
+    .mobile_control{
+        width: 80vw;
+        display:flex;
+        flex-direction: row;
+        justify-content: space-around;
+        margin: auto;
+        /* margin-top: 2vw; */
+    }
+    .mobile_button {
+        width: 10vw;
+        height: 10vw;
+        border-radius: 10vw;
+        border: 3px solid grey;
+        color:gray;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 3vw;
+        font-weight: bold;
+    }
+</style>
 <script>
+    const MOBILE_BREAKPOINT = 500
+    var window_width;
     var screen = document.getElementById("screen")
     var volume_knob = document.getElementById("volume")
     var station_knob = document.getElementById("station")
     var flasher = document.getElementById("flasher")
+    var mobile_control = document.getElementById("mobile_control")
     var stations;
     var num_stations;
     var callsign;
@@ -74,39 +208,31 @@
                 flasher.style.display='inline'
             }
         }
-        if(playing){
-            play()
-        }
     },100)
+    const size = () => {
+        console.log("size")
+        window_width = window.innerWidth
+        console.log(window_width)
+        if(window_width < MOBILE_BREAKPOINT){
+            mobile_control.style.display = 'flex'
+        } else {
+            mobile_control.style.display = 'none'
+        }
+    }
+    size()
+    window.addEventListener("resize", size)
     volume_knob.addEventListener("mousedown", e=> {
         document.getElementsByTagName("body")[0].style.cursor = "row-resize"
         clickY=e.clientY
         moving_volume = true
     })
-    volume_knob.ontouchstart= e=> {
-        e.preventDefault()
-        document.getElementsByTagName("body")[0].style.cursor = "row-resize"
-        clickY=e.touches[0].clientY
-        moving_volume = true
-    }
     station_knob.addEventListener("mousedown", e=> {
         document.getElementsByTagName("body")[0].style.cursor = "row-resize"
         clickY=e.clientY
         moving_station = true
     })
-    station_knob.ontouchstart = e=> {
-        e.preventDefault()
-        document.getElementsByTagName("body")[0].style.cursor = "row-resize"
-        clickY=e.touches[0].clientY
-        moving_station = true
-    }
     document.addEventListener("mousedown", e=> play())
-    document.ontouchstart = e=> {
-        e.preventDefault()
-        play()
-    }
     document.addEventListener("mousemove", e=> {
-        play()
         if(moving_volume){
             change = clickY - e.clientY
             if(change > 10){
@@ -140,54 +266,11 @@
             }
         }
     })
-    document.ontouchmove = e=> {
-        e.preventDefault()
-        play()
-        if(moving_volume){
-            change = clickY - e.touches[0].clientY
-            if(change > 10){
-                set_volume(true)
-                clickY = e.touches[0].clientY
-            }else if(change < (-10)){
-                set_volume(false)
-                clickY = e.touches[0].clientY
-            }
-        }else if (moving_station){
-            change = clickY - e.touches[0].clientY
-            if((change > 10) && (station < (num_stations - 1))){
-                tune(true)
-                if(!audio.loaded)
-                if(audio.duration > 0){
-                    tune_in()
-                } else {
-                    audio.removeEventListener("playing", tune_in)
-                    audio.addEventListener("playing", tune_in)
-                }
-                clickY = e.touches[0].clientY
-            }else if((change < -10) && (station > 0)){
-                tune(false)
-                if(audio.duration > 0){
-                    tune_in()
-                } else {
-                    audio.removeEventListener("playing", tune_in)
-                    audio.addEventListener("playing", tune_in)
-                }
-                clickY = e.touches[0].clientY
-            }
-        }
-    }
     document.addEventListener("mouseup", e=> {
         document.getElementsByTagName("body")[0].style.cursor = "default"
         moving_volume = false;
         moving_station = false;
     })
-    document.ontouchend = e => {
-        e.preventDefault()
-        document.getElementsByTagName("body")[0].style.cursor = "default"
-        moving_volume = false;
-        moving_station = false;
-        play()
-    }
     const play = () => {
         audio.play().catch(console.error)
         playing=true
