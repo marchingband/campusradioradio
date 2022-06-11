@@ -1,0 +1,180 @@
+<html>
+    <h1 style="margin-left:auto;margin-right:auto;text-align:center;user-select:none">
+        CAMPUS RADIO RADIO
+    </h1>
+    <div style="width:400;height:200;border:10px solid gold;border-radius:10px;display:flex;flex-direction:row;justify-content:space-around;margin:auto">
+        <!-- speaker -->
+        <div style="width:180;height:180;margin:7;border:3px solid grey;border-radius:90px"></div>
+        <!-- console -->
+        <div style="width:200;height:200;display:flex;flex-direction:column;align-items:center">
+            <!-- screen -->
+            <div style="width:80;height:30;margin:20;border:3px solid grey;display:flex;align-items:center;justify-content:center;user-select: none;position:relative;">
+                <div id="screen"></div>
+                <div id="flasher" style="position:absolute;right:5;font-size:8px">
+                    o
+                </div>
+            </div>
+            <!-- knobs -->
+            <div style="width:200;height:80;display:flex;flex-direction:row;justify-content:space-around;margin-top:auto">
+                <!-- station -->
+                <div style="width:200;height:80;display:flex;flex-direction:column;align-items: center;margin-top:auto">
+                    <div id="station" style="width:40;height:40;border:3px solid grey;border-radius:40px;display:flex;">
+                        <div style="margin-right:auto;margin-top:auto;user-select:none;">
+                            o
+                        </div>
+                    </div>
+                    <div style="font-size:11px;font-weight:bold;margin-top:5px;user-select:none;">
+                        TUNE
+                    </div>
+                </div>
+                <!-- volume -->
+                <div style="width:200;height:80;display:flex;flex-direction:column;align-items: center;margin-top:auto">
+                    <div id="volume" style="width:40;height:40;border:3px solid grey;border-radius:40px;display:flex">
+                        <div style="margin-left:auto;margin-top:auto;user-select:none;">
+                            o
+                        </div>
+                    </div>
+                    <div style="font-size:11px;font-weight:bold;margin-top:5px;user-select:none;">
+                        VOLUME
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h1 style="margin-left:auto;margin-right:auto;text-align:center;user-select:none;">
+        RADIO CAMPUS RADIO
+    </h1>
+    <script>
+        var screen = document.getElementById("screen")
+        var volume_knob = document.getElementById("volume")
+        var station_knob = document.getElementById("station")
+        var flasher = document.getElementById("flasher")
+        var stations;
+        var num_stations;
+        var callsign;
+        var url;
+        var station = 0;
+        var audio;
+        var volume = 1.0;
+        var clickY;
+        var moving_volume = false;
+        var moving_station = false;
+        var loading = false
+        var flash = true
+        window.setInterval(()=>{
+            if(loading){
+                if(flash){
+                    flash = false
+                    flasher.style.display='none'
+                } else {
+                    flash = true
+                    flasher.style.display='inline'
+                }
+            }
+        },100)
+        volume_knob.addEventListener("mousedown", e=> {
+            clickY=e.clientY
+            moving_volume = true
+        })
+        station_knob.addEventListener("mousedown", e=> {
+            clickY=e.clientY
+            moving_station = true
+        })
+        document.addEventListener("mousedown", e=> play())
+        document.addEventListener("mousemove", e=> {
+            if(moving_volume){
+                change = clickY - e.clientY
+                if(change > 10){
+                    set_volume(true)
+                    clickY = e.clientY
+                }else if(change < (-10)){
+                    set_volume(false)
+                    clickY = e.clientY
+                }
+            }else if (moving_station){
+                change = clickY - e.clientY
+                if((change > 10) && (station < (num_stations - 1))){
+                    tune(true)
+                    if(audio.duration > 0){
+                        tune_in()
+                    } else {
+                        audio.removeEventListener("playing", tune_in)
+                        audio.addEventListener("playing", tune_in)
+                    }
+                    clickY = e.clientY
+                }else if((change < -10) && (station > 0)){
+                    tune(false)
+                    if(audio.duration > 0){
+                        tune_in()
+                    } else {
+                        audio.removeEventListener("playing", tune_in)
+                        audio.addEventListener("playing", tune_in)
+                    }
+                    clickY = e.clientY
+                }
+            }
+        })
+        document.addEventListener("mouseup", e=> {
+            moving_volume = false;
+            moving_station = false;
+        })
+        const play = () => {
+            audio.play().catch(console.error)
+            audio.addEventListener("playing", e=>{
+                loading=false
+            })
+        }
+        const tune_in = async() => {
+            audio.pause()
+            loading=true
+            callsign = stations[station][0]
+            url = stations[station][1];
+            audio = new Audio(url)
+            audio.volume = volume;
+            play()
+            screen.innerText = callsign
+        }
+        const tune = async(up) => {
+            if(up && station < (num_stations - 1)){
+                station ++
+                callsign = stations[station][0]
+                url = stations[station][1]
+                screen.innerText = callsign
+                station_knob.style.transform = "rotate(" + station / num_stations + "turn)"
+            }
+            else if (!up && station > 0){
+                station --
+                callsign = stations[station][0]
+                url = stations[station][1]
+                screen.innerText = callsign
+                station_knob.style.transform = "rotate(" + station / num_stations + "turn)"
+            }
+        }
+        const set_volume = up => {
+            if(up && volume < 1.0){
+                volume += 0.1
+                audio.volume = volume
+                volume_knob.style.transform = "rotate(" + ((volume * 0.7) + 0.3) + "turn)"
+            } else if(!up && (volume > 0.1)){
+                volume -= 0.1
+                audio.volume = volume
+                volume_knob.style.transform = "rotate(" + ((volume * 0.7) + 0.3) + "turn)"
+            }
+        }
+        const run = async()=> {
+            stations = await fetch("https://marchingband.github.io/campusradioradio/data/stations.json").then(r=>r.json())
+            num_stations = stations.length
+            callsign = stations[station][0]
+            url = stations[station][1]
+            audio = new Audio(url)
+            audio.volume = volume
+            screen.innerText = callsign
+        }
+        run()
+        // while(1){
+        //     if(loading){
+
+        //     }
+        // }
+    </script>
+</html>
