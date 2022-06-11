@@ -120,6 +120,8 @@
         justify-content: center;
         font-size: 3vw;
         font-weight: bold;
+        cursor: pointer;
+        color:lightgray
     }
     .console {
         width:35vw;
@@ -187,6 +189,7 @@
 </style>
 <script>
     const MOBILE_BREAKPOINT = 500
+    var muted = true
     var window_width;
     var screen = document.getElementById("screen")
     var speaker = document.getElementById("speaker")
@@ -231,12 +234,18 @@
     size()
     window.addEventListener("resize", size)
     window.addEventListener("click",()=>{
-        speaker.innerText = ""
-        loading=true
+        if(muted){
+            muted = false
+            speaker.innerText = ""
+            loading=true
+        }
     })
     window.addEventListener("touchstart",()=>{
-        speaker.innerText = ""
-        loading=true
+        if(muted){
+            muted = false
+            speaker.innerText = ""
+            loading=true
+        }
     })
     volume_knob.addEventListener("mousedown", e=> {
         document.getElementsByTagName("body")[0].style.cursor = "row-resize"
