@@ -18,7 +18,7 @@
             <div style="width:200;height:80;display:flex;flex-direction:row;justify-content:space-around;margin-top:auto">
                 <!-- station -->
                 <div style="width:200;height:80;display:flex;flex-direction:column;align-items: center;margin-top:auto">
-                    <div id="station" style="width:40;height:40;border:3px solid grey;border-radius:40px;display:flex;">
+                    <div id="station" style="width:40;height:40;border:3px solid grey;border-radius:40px;display:flex;cursor:row-resize;">
                         <div style="margin-right:auto;margin-top:auto;user-select:none;">
                             ●
                         </div>
@@ -29,7 +29,7 @@
                 </div>
                 <!-- volume -->
                 <div style="width:200;height:80;display:flex;flex-direction:column;align-items: center;margin-top:auto">
-                    <div id="volume" style="width:40;height:40;border:3px solid grey;border-radius:40px;display:flex">
+                    <div id="volume" style="width:40;height:40;border:3px solid grey;border-radius:40px;display:flex;cursor:row-resize;">
                         <div style="margin-left:auto;margin-top:auto;user-select:none;">
                             ●
                         </div>
@@ -73,10 +73,12 @@
             }
         },100)
         volume_knob.addEventListener("mousedown", e=> {
+            document.getElementsByTagName("body")[0].style.cursor = "row-resize"
             clickY=e.clientY
             moving_volume = true
         })
         station_knob.addEventListener("mousedown", e=> {
+            document.getElementsByTagName("body")[0].style.cursor = "row-resize"
             clickY=e.clientY
             moving_station = true
         })
@@ -116,6 +118,7 @@
             }
         })
         document.addEventListener("mouseup", e=> {
+            document.getElementsByTagName("body")[0].style.cursor = "default"
             moving_volume = false;
             moving_station = false;
         })
