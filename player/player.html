@@ -125,7 +125,11 @@
             })
         }
         const tune_in = async() => {
-            audio.pause()
+            try{
+                audio.pause()
+            }catch(e){
+                console.error(e)
+            }
             loading=true
             callsign = stations[station][0]
             url = stations[station][1];
