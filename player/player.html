@@ -95,6 +95,7 @@
                 change = clickY - e.clientY
                 if((change > 10) && (station < (num_stations - 1))){
                     tune(true)
+                    if(!audio.loaded)
                     if(audio.duration > 0){
                         tune_in()
                     } else {
@@ -166,7 +167,7 @@
             }
         }
         const run = async()=> {
-            stations = await fetch("https://marchingband.github.io/campusradioradio/data/stations.json").then(r=>r.json())
+            stations = await fetch("https://marchingband.github.io/campusradioradio/data/stations.json").then(r=>r.json()).then(json=>json.filter(x=>x[1].startsWith("https")))
             num_stations = stations.length
             callsign = stations[station][0]
             url = stations[station][1]
@@ -175,10 +176,5 @@
             screen.innerText = callsign
         }
         run()
-        // while(1){
-        //     if(loading){
-
-        //     }
-        // }
     </script>
 </html>
