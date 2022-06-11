@@ -80,6 +80,7 @@
         moving_volume = true
     })
     volume_knob.ontouchstart= e=> {
+        e.preventDefault()
         document.getElementsByTagName("body")[0].style.cursor = "row-resize"
         clickY=e.touches[0].clientY
         moving_volume = true
@@ -90,12 +91,16 @@
         moving_station = true
     })
     station_knob.ontouchstart = e=> {
+        e.preventDefault()
         document.getElementsByTagName("body")[0].style.cursor = "row-resize"
         clickY=e.touches[0].clientY
         moving_station = true
     }
     document.addEventListener("mousedown", e=> play())
-    document.addEventListener("touchstart", e=> play())
+    document.addEventListener("touchstart", e=> {
+        e.preventDefault()
+        play()
+    })
     document.addEventListener("mousemove", e=> {
         if(moving_volume){
             change = clickY - e.clientY
@@ -131,6 +136,7 @@
         }
     })
     document.addEventListener("touchmove", e=> {
+        e.preventDefault()
         console.log(e)
         if(moving_volume){
             change = clickY - e.touches[0].clientY
@@ -171,6 +177,7 @@
         moving_station = false;
     })
     document.addEventListener("touchend", e=> {
+        e.preventDefault()
         console.log("end")
         document.getElementsByTagName("body")[0].style.cursor = "default"
         moving_volume = false;
