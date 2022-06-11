@@ -47,9 +47,9 @@
             </div>
         </div>
     </div>
-    <h1 id="footer" style="margin-left:auto;margin-right:auto;text-align:center;user-select:none;">
+    <!-- <h1 id="footer" style="margin-left:auto;margin-right:auto;text-align:center;user-select:none;">
         RADIO CAMPUS RADIO
-    </h1>
+    </h1> -->
     <div class="mobile_control" id="mobile_control">
         <div class="mobile_button" onclick="set_volume(true)">
             <div>
@@ -72,6 +72,9 @@
             </div>
         </div>
     </div>
+    <h1 style="margin:auto;text-align:center;user-select:none;">
+        RADIO CAMPUS RADIO
+    </h1>
 </div>
 </body>
 <style>
@@ -83,14 +86,10 @@
         overflow:hidden
     }
     body {
-        /* position:fixed; */
         margin:0;
         padding:0;
-        /* overscroll-behavior:none;
-        overscroll-behavior-y:none; */
         width:100%;
         height:100%;
-        /* overflow:hidden; */
         display: flex;
         flex-direction: column;
     }
@@ -125,11 +124,9 @@
     }
     .console {
         width:35vw;
-        /* height:35vw; */
         display:flex;
         flex-direction:column;
         align-items:center;
-        /* border: 1px solid red */
     }
     .screen {
         width:16vw;
@@ -145,25 +142,18 @@
     }
     .knobs {
         width:30vw;
-        /* height:6vw; */
         display:flex;
         flex-direction:row;
         justify-content:space-around;
-        /* align-items: center; */
-        /* justify-content: center; */
         margin-top:auto;
         margin-bottom: 3vw;
-        /* border: 1px solid green; */
     }
     .knob {
-        /* width:200; */
-        /* height:80; */
         display:flex;
         flex-direction:column;
         align-items: center;
         margin-top:auto;
         font-size: 2vw;
-        /* border: 1px solid blue; */
     }
     .mobile_control{
         width: 80vw;
@@ -171,7 +161,8 @@
         flex-direction: row;
         justify-content: space-around;
         margin: auto;
-        /* margin-top: 2vw; */
+        margin-top: 2vw;
+        margin-bottom: 2vw;
     }
     .mobile_button {
         width: 10vw;
@@ -183,11 +174,13 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        font-size: 3vw;
+        font-size: 4vw;
         font-weight: bold;
+        /* box-shadow: 0.5vw 0.5vw black; */
     }
     * {
-        touch-action: manipulation;
+        user-select: none;
+        touch-action: none;
     }
 </style>
 <script>
