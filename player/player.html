@@ -63,6 +63,7 @@
     var moving_station = false;
     var loading = false
     var flash = true
+    var playing = true
     window.setInterval(()=>{
         if(loading){
             if(flash){
@@ -72,6 +73,9 @@
                 flash = true
                 flasher.style.display='inline'
             }
+        }
+        if(playing){
+            play()
         }
     },100)
     volume_knob.addEventListener("mousedown", e=> {
@@ -188,6 +192,7 @@
     })
     const play = () => {
         audio.play().catch(console.error)
+        playing=true
         audio.addEventListener("playing", e=>{
             loading=false
         })
