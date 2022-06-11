@@ -102,6 +102,7 @@
         play()
     })
     document.addEventListener("mousemove", e=> {
+        play()
         if(moving_volume){
             change = clickY - e.clientY
             if(change > 10){
@@ -137,6 +138,7 @@
     })
     document.addEventListener("touchmove", e=> {
         e.preventDefault()
+        play()
         console.log(e)
         if(moving_volume){
             change = clickY - e.touches[0].clientY
@@ -182,6 +184,7 @@
         document.getElementsByTagName("body")[0].style.cursor = "default"
         moving_volume = false;
         moving_station = false;
+        play()
     })
     const play = () => {
         audio.play().catch(console.error)
