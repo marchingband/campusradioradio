@@ -1,5 +1,6 @@
 <html>
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no">
+<title>CampusRadioRadio</title>
 <body>
 <div class="container" id="container">
     <h1 style="margin-left:auto;margin-right:auto;text-align:center;user-select:none">
@@ -7,7 +8,9 @@
     </h1>
     <div class="radio" id="radio">
         <!-- speaker -->
-        <div class="speaker"></div>
+        <div class="speaker" id="speaker">
+            MUTED
+        </div>
         <!-- console -->
         <div class="console">
             <!-- screen -->
@@ -111,7 +114,12 @@
         height:35vw;
         margin:2vw;
         border:3px solid grey;
-        border-radius:35vw
+        border-radius:35vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3vw;
+        font-weight: bold;
     }
     .console {
         width:35vw;
@@ -181,6 +189,7 @@
     const MOBILE_BREAKPOINT = 500
     var window_width;
     var screen = document.getElementById("screen")
+    var speaker = document.getElementById("speaker")
     var volume_knob = document.getElementById("volume")
     var station_knob = document.getElementById("station")
     var flasher = document.getElementById("flasher")
@@ -221,6 +230,14 @@
     }
     size()
     window.addEventListener("resize", size)
+    window.addEventListener("click",()=>{
+        speaker.innerText = ""
+        loading=true
+    })
+    window.addEventListener("touchstart",()=>{
+        speaker.innerText = ""
+        loading=true
+    })
     volume_knob.addEventListener("mousedown", e=> {
         document.getElementsByTagName("body")[0].style.cursor = "row-resize"
         clickY=e.clientY
@@ -281,9 +298,7 @@
     const tune_in = async() => {
         try{
             audio.pause()
-        }catch(e){
-            console.error(e)
-        }
+        }catch(e){}
         loading=true
         callsign = stations[station][0]
         url = stations[station][1];
