@@ -47,9 +47,6 @@
             </div>
         </div>
     </div>
-    <!-- <h1 id="footer" style="margin-left:auto;margin-right:auto;text-align:center;user-select:none;">
-        RADIO CAMPUS RADIO
-    </h1> -->
     <div class="mobile_control" id="mobile_control">
         <div class="mobile_button" onclick="set_volume(true)">
             <div>
@@ -187,6 +184,7 @@
     const MOBILE_BREAKPOINT = 500
     var muted = true
     var window_width;
+    var units;
     var screen = document.getElementById("screen")
     var speaker = document.getElementById("speaker")
     var volume_knob = document.getElementById("volume")
@@ -340,7 +338,9 @@
         }
     }
     const run = async()=> {
-        stations = await fetch("https://marchingband.github.io/campusradioradio/data/stations.json").then(r=>r.json()).then(json=>json.filter(x=>x[1].startsWith("https")))
+        stations = await fetch("https://marchingband.github.io/campusradioradio/data/stations.json")
+            .then(r=>r.json())
+            .then(json=>json.filter(x=>x[1].startsWith("https")))
         num_stations = stations.length
         callsign = stations[station][0]
         url = stations[station][1]
