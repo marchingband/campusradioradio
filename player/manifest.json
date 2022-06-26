@@ -3,7 +3,7 @@
     "name": "Campus Radio Radio",
     "icons": [
       {
-        "src": "/player/icon.png",
+        "src": "/icon.png",
         "type": "image/png",
         "sizes": "512x512"
       }
