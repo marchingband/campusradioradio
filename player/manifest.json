@@ -3,7 +3,7 @@
     "name": "Campus Radio Radio",
     "icons": [
       {
-        "src": "icon.png",
+        "src": "https://marchingband.github.io/campusradioradio/player/icon.png",
         "type": "image/png",
         "sizes": "512x512"
       }
