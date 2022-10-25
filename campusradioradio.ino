@@ -25,6 +25,8 @@
 #define SCREEN_ADDRESS 0x3C
 #define DISPLAY_ON_SECONDS 15
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+// SDA pin 21
+// SCL pin 22
 
 // AUDIO
 #define I2S_DOUT      23 // 17 // 22  // DIN connection
