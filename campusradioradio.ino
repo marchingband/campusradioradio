@@ -15,8 +15,6 @@
 
 // ENCODER
 #define ENC_PUSH 19
-#define ENC_A 34
-#define ENC_B 35
 #define ENC_DEBOUNCE_TIME_MS 500
 unsigned long last_enc_push = 0;
 
@@ -76,6 +74,7 @@ void use_screen(void){
 
 bool should_sleep(void){
     return((millis() - last_display_update) > (1000 * DISPLAY_ON_SECONDS));
+    // return false;
 }
 
 void readVolume(void)

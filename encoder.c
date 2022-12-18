@@ -8,8 +8,8 @@
 
 static const char* tag = "encoder";
 
-#define ROT_ENC_A_GPIO 34
-#define ROT_ENC_B_GPIO 35
+#define ROT_ENC_A_GPIO 35
+#define ROT_ENC_B_GPIO 34
 #define ENABLE_HALF_STEPS false  // Set to true to enable tracking of rotary encoder at half step resolution
 #define RESET_AT          0      // Set to a positive non-zero number to reset the position if this value is exceeded
 // #define FLIP_DIRECTION      // Set to true to reverse the clockwise/counterclockwise sense
