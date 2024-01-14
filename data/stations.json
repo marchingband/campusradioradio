@@ -165,5 +165,13 @@
 [
     "EURO",
     "http://usa19.fastcast4u.com:9200/;?type=http&nocache=1683144946"
-]
+],
+    [
+        "RINS",
+        "https://streamer-uk.rinse.fm:8443/stream.m3u"
+    ],
+    [
+        "WRLD",
+        "https://worldwidefm.out.airtime.pro/worldwidefm_b.m3u"
+    ]
 ]
