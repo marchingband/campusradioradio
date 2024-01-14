@@ -165,4 +165,25 @@
 [
     "EURO",
     "http://usa19.fastcast4u.com:9200/;?type=http&nocache=1683144946"
-]]
+],
+    [
+        "N10A",
+        "https://n10as.out.airtime.pro/n10as_a"
+    ],
+    [
+        "NTS1",
+        "https://stream-relay-geo.ntslive.net/stream"
+    ],
+    [
+        "NTS2",
+        "https://stream-relay-geo.ntslive.net/stream2"
+    ],
+    [
+        "RINS",
+        "https://streamer-uk.rinse.fm:8443/stream"
+    ],
+    [
+        "WRLD",
+        "https://worldwidefm.out.airtime.pro/worldwidefm_b"
+    ]
+]
