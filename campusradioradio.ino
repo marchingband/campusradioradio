@@ -37,7 +37,7 @@ Audio audio;
 uint8_t volume = 0;
 
 // STATIONS
-#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations.json" // canada
+#define JSON_HOST "https://marchingband.github.io/campusradioradio/data/rowans_stations.json" // canada
 // #define JSON_HOST "https://marchingband.github.io/campusradioradio/data/stations-idaho.json" // idaho
 Preferences preferences;
 struct SpiRamAllocator {
