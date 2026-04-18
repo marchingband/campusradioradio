@@ -1,6 +1,7 @@
-[[
+[
+[
     "CFBU",
-    "http://s2.stationplaylist.com:8110/;&lang=sp&title=CFBU.ca&lang=en"
+    "https://stream2.statsradio.com:8160/stream"
 ],
 [
     "CFFF",
@@ -12,19 +13,15 @@
 ],
 [
     "CFOU",
-    "http://198.50.204.108:9308/;"
+    "https://stream.zoneplus.ca/9308/stream"
 ],
 [
     "CFRC",
-    "https://audio.cfrc.ca/stream"
-],
-[
-    "CFRE",
-    "http://s2.yesstreaming.net:7069/stream"
+    "https://audio-edge-2a8hd.sfo.he.radiomast.io/e5ebc530-289b-4105-9840-364a792d625f"
 ],
 [
     "CFRU",
-    "https://archive.cfru.ca/cfruhi2"    
+    "https://listen.cfru.ca/"    
 ],
 [
     "CFUR",
@@ -36,7 +33,7 @@
 ],
 [
     "CHLY",
-    "http://184.69.114.194:8000/stream.mp3"
+    "https://stream.statsradio.com:8146/stream"
 ],
 [
     "CHMA",
@@ -44,7 +41,7 @@
 ],
 [
     "CHMR",
-    "http://mp3srv.munsu.mun.ca:8001/"
+    "http://192.99.14.49:9005/live128"
 ],
 [
     "CHRW",
@@ -57,10 +54,6 @@
 [
     "CHSR",
     "https://usa6.fastcast4u.com/proxy/chsrbroa?mp=%2Fstream"
-],
-[
-    "CHUO",
-    "https://stream.statsradio.com:8102/stream"
 ],
 [
     "CHYZ",
@@ -88,15 +81,12 @@
 ],
 [
     "CJAM",
-    "http://stream.cjam.ca:8000/"
+    "https://cast5.my-control-panel.com/proxy/lorne/stream.aac"
 ],
-[
-    "CJJJ",
-    "https://assiniboine.net/sites/default/files/documents/2019-09/cj106-mp3.m3u"
-],
+
 [
     "CJLO",
-    "http://rosetta.shoutca.st:8883/stream"
+    "https://cjlo.radioca.st/stream"
 ],
 [
     "CJLX",
@@ -108,7 +98,7 @@
 ],
 [
     "CJSF",
-    "https://www.cjsf.ca:8443/listen"    
+    "https://www.cjsf.ca/streaming"    
 ],
 [
     "CJSR",
@@ -140,7 +130,7 @@
 ],
 [
     "CKUT",
-    "https://delray.ckut.ca:8001/903fm-64-mono"    
+    "https://delray.ckut.ca:8001/903fm-192-stereo"    
 ],
 [
     "CKUW",
@@ -148,7 +138,7 @@
 ],
 [
     "CKXU",
-    "https://stream.ckxu.com/stream/2/"
+    "https://stream.ckxu.com/listen/ckxu_radio_station/radio.mp3"
 ],
 [
     "CIXX",
@@ -160,7 +150,7 @@
 ],
 [
     "CRNC",
-    "https://crystalout.surfernetwork.com:8001/CRNC_MP3"    
+    "https://stream-04.surfernetwork.com/awykighuv6qtv"    
 ],
 [
     "EURO",

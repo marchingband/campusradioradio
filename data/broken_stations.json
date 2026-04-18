@@ -1,4 +1,20 @@
 [[
+    "CFBU",
+    "http://s2.stationplaylist.com:8110/;&lang=sp&title=CFBU.ca&lang=en"
+],
+[
+    "CFOU",
+    "http://198.50.204.108:9308/;"
+],
+[
+    "CFRC",
+    "https://audio.cfrc.ca/stream"
+],
+[
+    "CFRE",
+    "http://s2.yesstreaming.net:7069/stream"
+],
+[
     "CFAK",
     "http://streamer01.sti.usherbrooke.ca:8000/cfak.mp3"
 ],
@@ -9,6 +25,10 @@
 [
     "CJIQ",
     "https://conestoga.leanstream.co/CJIQFM"
+],
+[
+    "CJJJ",
+    "https://assiniboine.net/sites/default/files/documents/2019-09/cj106-mp3.m3u"
 ],
 [
     "CJRU",
